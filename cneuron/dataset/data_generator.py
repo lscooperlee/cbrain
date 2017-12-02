@@ -36,14 +36,9 @@ class RandomDataGenerator(DataGenerator):
         self.high = high
 
     def iget(self, start=0, stop=None, step=1):
-        if stop is None:
-            while True:
-                random = np.random.random_sample(self.shape)
-                yield (self.high - self.low)*random + self.low
-        else:
-            for _ in range(start, stop, step):
-                random = np.random.random_sample(self.shape)
-                yield (self.high - self.low)*random + self.low
+        for _ in range(start, stop, step) if stop else itertools.count():
+            random = np.random.random_sample(self.shape)
+            yield (self.high - self.low)*random + self.low
 
 
 class IntegerDataGenerator(DataGenerator):
@@ -67,3 +62,16 @@ class SequenceDataGenerator(DataGenerator):
                 yield np.array([self.sequence[i]])
             except:
                 raise StopIteration
+
+
+class ProbabilityDataGenerator(DataGenerator):
+
+    def __init__(self, pattern, prob=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pattern = pattern
+        self.prob = prob
+
+    def iget(self, start=0, stop=None, step=1):
+        for _ in range(start, stop, step) if stop else itertools.count():
+            n = np.random.choice(len(self.pattern), p=self.prob)
+            yield self.pattern[n]

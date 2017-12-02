@@ -1,49 +1,92 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_array_equal, assert_almost_equal
+import itertools
+from numpy.testing import assert_array_equal
 
 from cneuron.networks import RBM
+from cneuron.networks import learning_rate
+from cneuron.networks import weight_decay
+from cneuron.networks import momentum
+from cneuron.functions import Logsig
+from cneuron.functions import Line
+from cneuron.dataset import ProbabilityDataGenerator
+from cneuron.dataset import FunctionDataSet
 
+class ProbFunctionDataSet(FunctionDataSet, Line, ProbabilityDataGenerator):
+    pass
 
 class TestRBM(unittest.TestCase):
 
-    def test_RBM_constructor(self):
-        rbm = RBM(3, 2)
-        print(rbm.B, rbm.W, rbm.C)
+    def test_RBM(self):
+        rbm = RBM((3, 2))
+        self.assertEqual(len(rbm.T['B']), 3)
+        self.assertEqual(len(rbm.T['C']), 2)
+        self.assertEqual(len(rbm.T['W']), 3)
 
-    def test_RBM_energy(self):
+    def test_alpha(self):
+        rbm = RBM((3, 2))
+        rbm.T['W'] = np.array([[1, 2], [2, 1], [1, 0.5]])
+        rbm.T['B'] = np.array([1, 1, 0.5])
+        rbm.T['C'] = np.array([1, 2])
+
         v = np.array([1, 1, 0])
-        h = np.array([1, 0])
+        assert_array_equal(rbm._alpha(v), [4, 5])
 
-        w = np.array([[0.1, 0.1], [0.2, 0], [-0.1, 0]])
-        b = np.array([1, 1, 0])
-        c = np.array([0, 1])
+    def test_beta(self):
+        rbm = RBM((3, 2))
+        rbm.T['W'] = np.array([[1, 2], [2, 1], [1, 0.5]])
+        rbm.T['B'] = np.array([1, 1, 0.5])
+        rbm.T['C'] = np.array([1, 2])
 
-        rbm = RBM(3, 2, W=w, B=b, C=c)
-        ret = rbm.E(v, h)
-        print(ret)
+        h = np.array([0, 1])
+        assert_array_equal(rbm._beta(h), [3, 2, 1])
 
-    def test_RBM_P(self):
-        v = np.array([1, 1, 0])
-        h = np.array([1, 0])
+    def test_train_iter(self):
+        rbm = RBM((3, 2))
+        rbm.T['W'] = np.array([[1, 2], [2, 1], [1, 0.5]])
+        rbm.T['B'] = np.array([1, 1, 0.5])
+        rbm.T['C'] = np.array([1, 2])
 
-        w = np.array([[0.1, 0.1], [0.2, 0], [-0.1, 0]])
-        b = np.array([1, 1, 0])
-        c = np.array([0, 1])
+        v = np.array([0, 1, 1])
+        rbm.CD(v)
 
-        rbm = RBM(3, 2, W=w, B=b, C=c)
-        ret = rbm.Z()
-        #print(ret)
+    def test_sample(self):
+        rbm = RBM((3, 2))
+        rbm.T['W'] = np.array([[-1, -2], [-2, 1], [1, 0.5]])
+        rbm.T['B'] = np.array([1, -1, 0.5])
+        rbm.T['C'] = np.array([1, -2])
 
-        #ret = rbm.P(v, h)
-        #print(ret)
+        v = np.array([0, 1, 0])
+        v1 = rbm.sample(v)
 
-        import itertools
-        all_v = itertools.product([0, 1], repeat=3)
-        all_h = itertools.product([0, 1], repeat=2)
+        assert_array_equal(len(v1), 3)
 
-        for v, h in itertools.product(all_v, all_h):
-            print(v, h, rbm.P(v, h))
+    def test_generate(self):
+        rbm = RBM((3, 2))
+        rbm.T['W'] = np.array([[-1, -2], [-2, 1], [1, 0.5]])
+        rbm.T['B'] = np.array([1, -1, 0.5])
+        rbm.T['C'] = np.array([1, -2])
+
+        g = rbm.generate(size=100)
+
+    def test_decor(self):
+
+        @learning_rate()
+    #    @weight_decay()
+    #    @momentum()
+        class SimpleBernoulliRBM(RBM):
+            pass
+
+        network = SimpleBernoulliRBM((2, 1))
+        dg = ProbabilityDataGenerator(pattern = [[0, 0], [1, 1]],
+                                      prob = [0.5, 0.5])
+
+        data = dg.get(0, 1000, 1)
+        train_iter = network.train(data)
+
+        train5 = itertools.islice(train_iter, 5)
+        for s in train5:
+            pass
 
 if __name__ == "__main__":
     unittest.main()

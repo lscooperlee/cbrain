@@ -1,10 +1,14 @@
 import unittest
 import numpy as np
+import itertools
+from collections import Counter
 
 from cneuron.dataset import FunctionDataSet
 from cneuron.dataset import MnistDataSet
-from cneuron.dataset import RandomDataGenerator, IntegerDataGenerator
+from cneuron.dataset import RandomDataGenerator
+from cneuron.dataset import IntegerDataGenerator
 from cneuron.dataset import SequenceDataGenerator
+from cneuron.dataset import ProbabilityDataGenerator
 from cneuron.functions import Square, Fibonacci, Sin
 
 
@@ -59,7 +63,7 @@ class TestDataSet(unittest.TestCase):
         i, t = dataset.train_data()
 
 
-class TestDataGenerator(unittest.TestCase):
+class TestSequenceGenerator(unittest.TestCase):
 
     def test_SequenceDataGenerator(self):
         seq = (0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0)
@@ -69,13 +73,30 @@ class TestDataGenerator(unittest.TestCase):
 
         self.assertTrue(all(x[0]==y for x, y in zip(data.tolist(), list(seq))))
 
+
+class TestIntegerGenerator(unittest.TestCase):
+
     def test_IntegerDataGenerator(self):
         dg = IntegerDataGenerator()
 
         data = dg.get(0, 5, 1)
 
-        self.assertTrue(all(x[0]==y
-                            for x, y in zip(data.tolist(), range(5))))
+        self.assertTrue(all(x[0]==y for x, y in zip(data.tolist(), range(5))))
+
+
+class TestProbabilityGenerator(unittest.TestCase):
+
+    def test_ProbabilityDataGenerator(self):
+        pattern = np.array([[1, 1], [3, 3]])
+        prob = [0.5, 0.5]
+        dg = ProbabilityDataGenerator(pattern, prob)
+
+        data = dg.get(0, 1000, 1)
+        a, c = np.unique(data, axis=0, return_counts=True)
+
+        np.testing.assert_equal(pattern, a)
+        self.assertEqual(np.round(c[0]/c[1]), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
