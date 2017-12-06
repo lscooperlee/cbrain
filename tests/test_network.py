@@ -16,8 +16,7 @@ class TestAbstractNetwork(unittest.TestCase):
 
             def __init__(self):
                 super().__init__()
-                self.T['t1'] = 1
-                self.T['t2'] = 2
+                self.update_theta({'t1':1, 't2':2})
 
             def train_iter(self, v):
                 return {'t1':1, 't2':1}
@@ -28,8 +27,8 @@ class TestAbstractNetwork(unittest.TestCase):
         train5 = itertools.islice(train_iter, 5)
 
         for n, s in enumerate(train5):
-            self.assertEqual(s.T['t1'], -n)
-            self.assertEqual(s.T['t2'], -n+1)
+            self.assertEqual(s.t1, -n)
+            self.assertEqual(s.t2, -n+1)
 
 
 class TestLearningRateDecor(unittest.TestCase):
@@ -41,8 +40,7 @@ class TestLearningRateDecor(unittest.TestCase):
 
             def __init__(self):
                 super().__init__()
-                self.T['t1'] = 1
-                self.T['t2'] = 2
+                self.update_theta({'t1':1, 't2':2})
 
             def train_iter(self, v):
                 return {'t1':0.1, 't2':0.1}
@@ -57,56 +55,54 @@ class TestLearningRateDecor(unittest.TestCase):
             self.assertEqual(s.T['t2'], -n+1.0)
 
 
-# class TestWeightDecayDecor(unittest.TestCase):
+class TestWeightDecayDecor(unittest.TestCase):
 
-    # def test_decor(self):
+    def test_decor(self):
 
-        # @weight_decay(2)
-        # class TestNetwork(AbstractNetwork):
+        @weight_decay(0.5)
+        class TestNetwork(AbstractNetwork):
 
-            # def __init__(self):
-                # self.t1 = 0
-                # self.t2 = 0
+            def __init__(self):
+                super().__init__()
+                self.update_theta({'t1':1, 't2':3})
 
-                # super().__init__(self.t1, self.t2)
+            def train_iter(self, v):
+                return {'t1':0, 't2':0}
 
-            # def train_iter(self, v):
-                # return [1, 1]
+        network = TestNetwork()
 
-        # network = TestNetwork()
+        train_iter = network.train([[]])
+        train5 = itertools.islice(train_iter, 5)
 
-        # train_iter = network.train([[]])
-        # train5 = itertools.islice(train_iter, 5)
+        t1, t2 = 1, 3
+        for n, s in enumerate(train5):
+            t1, t2 = t1/2, t2/2
+            self.assertEqual(s.t1, t1)
+            self.assertEqual(s.t2, t2)
 
-        # origin = network.theta
-        # for n, s in enumerate(train5):
-            # self.assertEqual(s.theta, [-1+n%2, -1+n%2])
 
+class TestMomentum(unittest.TestCase):
 
-# class TestMomentum(unittest.TestCase):
+    def test_decor(self):
 
-    # def test_decor(self):
+        @momentum(1)
+        class TestNetwork(AbstractNetwork):
 
-        # @momentum(2)
-        # class TestNetwork(AbstractNetwork):
+            def __init__(self):
+                super().__init__()
+                self.update_theta({'t1':1, 't2':2})
 
-            # def __init__(self):
-                # self.t1 = 0
-                # self.t2 = 0
+            def train_iter(self, v):
+                return {'t1':1, 't2':1}
 
-                # super().__init__(self.t1, self.t2)
+        network = TestNetwork()
 
-            # def train_iter(self, v):
-                # return [1, 2]
+        train_iter = network.train([[]])
+        train4 = itertools.islice(train_iter, 4)
 
-        # network = TestNetwork()
-
-        # train_iter = network.train([[]])
-        # train5 = itertools.islice(train_iter, 5)
-
-        # origin = network.theta
-        # for n, s in enumerate(train5, 1):
-            # self.assertEqual(s.theta, [-n, -n*2])
+        for n, s in enumerate(train4):
+            self.assertEqual(s.t1, -(n//2))
+            self.assertEqual(s.t2, (3-n)//2)
 
 if __name__ == "__main__":
     unittest.main()

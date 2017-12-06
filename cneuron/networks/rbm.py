@@ -1,5 +1,5 @@
 import numpy as np
-import itertools
+from itertools import product
 
 from ..functions import Logsig
 from .network import AbstractNetwork
@@ -9,13 +9,18 @@ class RBM(AbstractNetwork):
 
     def __init__(self, size):
         super().__init__()
-        self.T['W'] = np.random.random(size)
-        self.T['B'] = np.random.random(size[0])
-        self.T['C'] = np.random.random(size[1])
+
+        self.update_theta('W', 0.1*np.random.random(size)-0.05)
+        self.update_theta('B', 0.1*np.random.random(size[0])-0.05)
+        self.update_theta('C', 0.1*np.random.random(size[1])-0.05)
 
         self.size = size
 
         self.S = Logsig()
+
+        self.ALL_V = np.array(list(product(range(2), repeat=self.size[0])))
+        self.ALL_H = np.array(list(product(range(2), repeat=self.size[1])))
+        self.ALL = list(product(self.ALL_V, self.ALL_H))
 
 
     def CD(self, V, k=1):
@@ -29,29 +34,43 @@ class RBM(AbstractNetwork):
         return {"W":dW, "B":dB, "C":dC}
 
     def _alpha(self, V):
-        return self.T['W'].T @ V + self.T['C']
+        return self.W.T @ V + self.C
 
     def _beta(self, H):
-        return self.T['W'] @ H + self.T['B']
+        return self.W @ H + self.B
 
     def sample(self, V, k=1):
         for _ in range(k):
-            H = self.S(self._alpha(V)) > np.random.random(len(self.T['C']))
-            V = self.S(self._beta(H)) > np.random.random(len(self.T['B']))
+            H = self.S(self._alpha(V)) > np.random.random(len(self.C))
+            V = self.S(self._beta(H)) > np.random.random(len(self.B))
         return V
 
+    def Energy(self, V, H):
+        return V@self.W@H + V@self.B + H@self.C
+
+    def phat(self, V, H):
+        return np.exp(self.Energy(V, H))
+
+    def p(self, V, H):
+        return self.phat(V, H)/self.Z
+
+    def pv(self, V):
+        return sum(self.p(V, h) for h in self.ALL_H)
+
+    def ph(self, H):
+        return sum(self.p(v, H) for v in self.ALL_V)
+
+    @property
+    def Z(self):
+        return sum(self.phat(v, h) for v, h in self.ALL)
+
     def generate(self, size=1):
-        ALL_V = np.array(list(itertools.product(range(2), repeat=self.size[0])))
-        ALL_H = np.array(list(itertools.product(range(2), repeat=self.size[1])))
 
-        def etoE(V, H):
-            E = V@self.T['W']@H + V@self.T['B'] + H@self.T['C']
-            return np.exp(E)
+        pv = np.array([sum([self.phat(v, h) for h in self.ALL_H])
+                       for v in self.ALL_V])
+        idx = np.random.choice(len(self.ALL_V), p=pv/pv.sum(), size=size)
 
-        pv = np.array([sum([etoE(v, h) for h in ALL_H]) for v in ALL_V])
-        idx = np.random.choice(len(ALL_V), p=pv/pv.sum(), size=size)
-
-        return [ALL_V[i] for i in idx]
+        return [self.ALL_V[i] for i in idx]
 
 
     def train_iter(self, v):

@@ -9,8 +9,8 @@ from ..networks.network import momentum
 from ..dataset.data_generator import ProbabilityDataGenerator
 
 @learning_rate()
-#@weight_decay()
-#@momentum()
+@weight_decay()
+@momentum()
 class SimpleBernoulliRBM(RBM):
     pass
 
@@ -20,13 +20,17 @@ def RBM_on_GenerateData(times=10000):
     pattern = [[0, 0], [0, 1], [1, 0], [1, 1]]
     dg = ProbabilityDataGenerator(pattern = pattern,
                                   prob = [0.1, 0.4, 0.4, 0.1])
+                                  #prob = [0.0, 0.8, 0.2, 0.0])
+                                  #prob = [0.1, 0.7, 0.2, 0.0])
+
+    print(network.ph([0]))
+    print(network.ph([1]))
 
     data = dg.get(0, 1000, 1)
 
     train_iter = network.train(data)
     train = itertools.islice(train_iter, times)
     for s in train:
-#        print(s.theta)
         pass
 
     generated_data = network.generate(1000)
@@ -35,8 +39,10 @@ def RBM_on_GenerateData(times=10000):
     plt.bar([p-0.2 for p in range(len(pattern))], c, width=0.4)
 
     p, c = np.unique(generated_data, return_counts=True, axis=0)
-    print(p, c)
     plt.bar([p+0.2 for p in range(len(pattern))], c, width=0.4)
+
+    print(network.ph([0]))
+    print(network.ph([1]))
 
     plt.show()
 

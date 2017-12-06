@@ -57,7 +57,6 @@ class TestDataSet(unittest.TestCase):
 
         self.assertEqual(t, np.sin(i))
 
-    @unittest.skip
     def test_MnistDataSet(self):
         dataset = MnistDataSet()
         i, t = dataset.train_data()
