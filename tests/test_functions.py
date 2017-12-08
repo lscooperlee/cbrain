@@ -2,8 +2,8 @@ import unittest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_almost_equal
 
-from cneuron.functions import LMS, Square, Fibonacci, CrossEntropy
-from cneuron.functions import Line, Der, ReLU, Softmax, Jac, Gaussian
+from cbrain.function import LMS, Square, Fibonacci, CrossEntropy
+from cbrain.function import Line, Der, ReLU, Softmax, Jac, Gaussian
 
 
 class TestFunctions(unittest.TestCase):

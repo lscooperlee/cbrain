@@ -2,11 +2,12 @@
 import numpy as np
 from itertools import zip_longest
 
-from ..functions import Jac, Der, LMS
+from ..function import Jac, Der, LMS
 from .layer import LinearLayer, LayerOutput
+from .network import AbstractNetwork
 
 
-class DynamicNetwork:
+class DynamicNetwork(AbstractNetwork):
 
     class Cache:
 
@@ -92,12 +93,6 @@ class DynamicNetwork:
         o = self.layers[output_layer_num-1]
 
         o.connectedBy(i, D, W)
-
-    def train(self, input_values, output_values,
-              learning_rate=0.1, cost_func=LMS()):
-
-        for i, o in zip(input_values, output_values):
-            self.train_iter(i, o, learning_rate, cost_func)
 
     def train_iter(self, inputs, outputs, learning_rate=0.1, cost_func=LMS()):
             self.cache = self.Cache(self.maxD)

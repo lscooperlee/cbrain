@@ -3,10 +3,10 @@ import itertools
 import unittest
 import numpy as np
 
-from cneuron.networks import AbstractNetwork
-from cneuron.networks import learning_rate
-from cneuron.networks import weight_decay
-from cneuron.networks import momentum
+from cbrain.network import AbstractNetwork
+from cbrain.network import learning_rate
+from cbrain.network import weight_decay
+from cbrain.network import momentum
 
 
 class TestAbstractNetwork(unittest.TestCase):

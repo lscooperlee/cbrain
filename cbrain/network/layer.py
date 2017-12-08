@@ -5,7 +5,7 @@ import itertools
 import functools
 import collections
 
-from ..functions import Jac, Der, Line, LMS
+from ..function import Jac, Der, Line, LMS
 
 
 class Weight(np.ndarray):

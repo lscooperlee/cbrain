@@ -3,14 +3,14 @@ import numpy as np
 import itertools
 from numpy.testing import assert_array_equal
 
-from cneuron.networks import RBM
-from cneuron.networks import learning_rate
-from cneuron.networks import weight_decay
-from cneuron.networks import momentum
-from cneuron.functions import Logsig
-from cneuron.functions import Line
-from cneuron.dataset import ProbabilityDataGenerator
-from cneuron.dataset import FunctionDataSet
+from cbrain.network import RBM
+from cbrain.network import learning_rate
+from cbrain.network import weight_decay
+from cbrain.network import momentum
+from cbrain.function import Logsig
+from cbrain.function import Line
+from cbrain.dataset import ProbabilityDataGenerator
+from cbrain.dataset import FunctionDataSet
 
 class ProbFunctionDataSet(FunctionDataSet, Line, ProbabilityDataGenerator):
     pass
@@ -57,7 +57,7 @@ class TestRBM(unittest.TestCase):
         rbm.T['C'] = np.array([1, -2])
 
         v = np.array([0, 1, 0])
-        v1 = rbm.sample(v)
+        v1, _ = rbm.sample(v)
 
         assert_array_equal(len(v1), 3)
 
@@ -67,21 +67,22 @@ class TestRBM(unittest.TestCase):
         rbm.T['B'] = np.array([1, -1, 0.5])
         rbm.T['C'] = np.array([1, -2])
 
-        g = rbm.generate(size=100)
+        g = rbm.generate()
 
     def test_decor(self):
 
         @learning_rate()
-    #    @weight_decay()
-    #    @momentum()
+        @weight_decay()
+        @momentum()
         class SimpleBernoulliRBM(RBM):
             pass
 
-        network = SimpleBernoulliRBM((2, 1))
-        dg = ProbabilityDataGenerator(pattern = [[0, 0], [1, 1]],
+        network = SimpleBernoulliRBM((3, 2))
+        dg = ProbabilityDataGenerator(pattern = [[0, 0, 1], [1, 1, 0]],
                                       prob = [0.5, 0.5])
 
-        data = dg.get(0, 1000, 1)
+        data = dg.get(0, 10, 1)
+
         train_iter = network.train(data)
 
         train5 = itertools.islice(train_iter, 5)

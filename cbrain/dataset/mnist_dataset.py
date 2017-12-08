@@ -9,7 +9,9 @@ from .dataset import DataSet
 
 class MnistDataSet(DataSet):
 
-    def __init__(self, data_dir=None):
+    def __init__(self, data_dir=None, isBernoulli=True):
+        self.isBernoulli = isBernoulli
+
         if data_dir is None:
             data_dir = "/tmp/"
 
@@ -56,13 +58,16 @@ class MnistDataSet(DataSet):
         return images
 
     def itrain_data(self, start, stop, step):
-        images = self._read_images(self.train_fname_images)/255
+        images = self._read_images(self.train_fname_images)
+        images = images > 0 if self.isBernoulli else images/255
         labels = self._read_labels(self.train_fname_labels)
 
-        return itertools.islice(zip(images, labels), start, stop, step)
+        return itertools.islice(zip(images, labels), start,
+                                stop or len(images), step)
 
     def itest_data(self, start, stop, step):
-        images = self._read_images(self.test_fname_images)/255
+        images = self._read_images(self.test_fname_images)
+        images = images > 0 if self.isBernoulli else images/255
         labels = self._read_labels(self.test_fname_labels)
 
-        return itertools.islice(zip(images, labels), start, stop, step)
+        return itertools.islice(zip(images, labels), start, len(images), step)

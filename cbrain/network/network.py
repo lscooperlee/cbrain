@@ -23,22 +23,22 @@ class AbstractNetwork(abc.ABC):
             self.T[key] = value
 
     @abc.abstractmethod
-    def train_iter(self, v):
+    def train_iter(self, d):
         pass
 
-    def train_data(self, data):
-        for v in data:
-            dtheta = self.train_iter(v)
+    def _train(self, ds):
+        for d in itertools.cycle(ds):
+
+            dtheta = self.train_iter(d)
 
             for k, v in dtheta.items():
                 self.T[k] = self.T[k] - v
 
             yield self
 
-    def train(self, data):
-        while True:
-            np.random.shuffle(data)
-            yield from self.train_data(data)
+
+    def train(self, ds):
+        return self._train(ds)
 
 
 def learning_rate(rate = 0.1):
@@ -49,8 +49,8 @@ def learning_rate(rate = 0.1):
                 super().__init__(*args, **kwargs)
                 self.learning_rate = rate
 
-            def train_iter(self, v):
-                origin_delta = super().train_iter(v)
+            def train_iter(self, d):
+                origin_delta = super().train_iter(d)
 
                 for k, v in origin_delta.items():
                     origin_delta[k] = self.learning_rate * v
@@ -69,9 +69,9 @@ def weight_decay(decay = 0.01):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
 
-            def train_iter(self, v):
+            def train_iter(self, d):
                 learning_rate = getattr(self, 'learning_rate', 1)
-                origin_delta = super().train_iter(v)
+                origin_delta = super().train_iter(d)
 
                 for k, v in origin_delta.items():
                     theta = self.T[k]
@@ -93,8 +93,8 @@ def momentum(alpha = 0.75):
                 super().__init__(*args, **kwargs)
                 self.last_delta_theta = defaultdict(int)
 
-            def train_iter(self, v):
-                origin_delta = super().train_iter(v)
+            def train_iter(self, d):
+                origin_delta = super().train_iter(d)
 
                 for k, v in origin_delta.items():
                     last_delta_theta = self.last_delta_theta[k]

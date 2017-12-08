@@ -6,9 +6,9 @@ import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..networks.neuron import Layer, Network
+from ..network.neuron import Layer, Network
 from ..dataset.dataset import DataGenerator
-from ..functions import Logsig, Tansig, Softmax
+from ..function import Logsig, Tansig, Softmax
 
 
 def DNN_copy():

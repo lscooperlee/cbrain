@@ -3,13 +3,13 @@ import unittest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_almost_equal
 
-from cneuron.networks import LinearLayer, RadialLayer, FeedForwardLayer
-from cneuron.networks import DynamicNetwork, RadialBasisNetwork
-from cneuron.dataset import IntegerDataGenerator, RandomDataGenerator
-from cneuron.dataset import SequenceDataGenerator
-from cneuron.dataset import FunctionDataSet
-from cneuron.functions import LMS, Logsig, Square, Line, CrossEntropy
-from cneuron.functions import Gaussian
+from cbrain.network import LinearLayer, RadialLayer, FeedForwardLayer
+from cbrain.network import DynamicNetwork, RadialBasisNetwork
+from cbrain.dataset import IntegerDataGenerator, RandomDataGenerator
+from cbrain.dataset import SequenceDataGenerator
+from cbrain.dataset import FunctionDataSet
+from cbrain.function import LMS, Logsig, Square, Line, CrossEntropy
+from cbrain.function import Gaussian
 
 
 class TestDynamicNetworks(unittest.TestCase):

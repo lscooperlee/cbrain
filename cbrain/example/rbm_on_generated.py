@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import itertools
 
-from ..networks.rbm import RBM
-from ..networks.network import learning_rate
-from ..networks.network import weight_decay
-from ..networks.network import momentum
+from ..network.rbm import RBM
+from ..network.network import learning_rate
+from ..network.network import weight_decay
+from ..network.network import momentum
 from ..dataset.data_generator import ProbabilityDataGenerator
+from ..dataset.mnist_dataset import MnistDataSet
 
 @learning_rate()
 @weight_decay()
@@ -46,3 +47,23 @@ def RBM_on_GenerateData(times=10000):
 
     plt.show()
 
+
+def RBM_on_Mnist(times=1000):
+    network = SimpleBernoulliRBM((784, 500))
+
+    print(network)
+
+    dataset = MnistDataSet()
+    i = dataset.itrain_data(0, None, 1)
+    traind = (_[0] for _ in i)
+
+    train_iter = network.train(traind)
+    train = itertools.islice(train_iter, times)
+    for s in train:
+        pass
+
+    print("done")
+    h, v = network.generate()
+
+    plt.imshow(h.reshape(28, 28))
+    plt.show()

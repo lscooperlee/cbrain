@@ -3,13 +3,13 @@ import numpy as np
 import itertools
 from collections import Counter
 
-from cneuron.dataset import FunctionDataSet
-from cneuron.dataset import MnistDataSet
-from cneuron.dataset import RandomDataGenerator
-from cneuron.dataset import IntegerDataGenerator
-from cneuron.dataset import SequenceDataGenerator
-from cneuron.dataset import ProbabilityDataGenerator
-from cneuron.functions import Square, Fibonacci, Sin
+from cbrain.dataset import FunctionDataSet
+from cbrain.dataset import MnistDataSet
+from cbrain.dataset import RandomDataGenerator
+from cbrain.dataset import IntegerDataGenerator
+from cbrain.dataset import SequenceDataGenerator
+from cbrain.dataset import ProbabilityDataGenerator
+from cbrain.function import Square, Fibonacci, Sin
 
 
 class SquareRandomDataSet(FunctionDataSet, Square, RandomDataGenerator):
@@ -59,7 +59,7 @@ class TestDataSet(unittest.TestCase):
 
     def test_MnistDataSet(self):
         dataset = MnistDataSet()
-        i, t = dataset.train_data()
+        i, t = dataset.train_data(0, None)
 
 
 class TestSequenceGenerator(unittest.TestCase):

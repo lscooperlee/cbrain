@@ -2,7 +2,7 @@
 import abc
 
 from .data_generator import DataGenerator
-from ..functions import Function
+from ..function import Function
 
 
 class DataSet(abc.ABC):
@@ -20,7 +20,7 @@ class DataSet(abc.ABC):
         """
 
     def __data_handler(self, iterator, start=0, stop=1, step=1):
-        if stop - start == step:
+        if stop is not None and stop - start == step:
             return next(iterator(start, stop, step))
         else:
             it = iterator(start, stop, step)
