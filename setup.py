@@ -11,7 +11,7 @@ setup(
         license = "BSD",
         keywords = "",
         url = "",
-#        packages=['cbrain'],
+#        packages=['cbrain/'],
         packages=find_packages(),
         long_description='README',
         classifiers=[ ],
